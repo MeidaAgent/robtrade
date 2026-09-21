@@ -122,7 +122,7 @@ export async function submitOrder(req: AuthedRequest, res: Response) {
   }
 
   const receipt = await provider.getTransactionReceipt(txHash);
-  const status = receipt ? (receipt.status === 1 ? "CONFIRMED" : "FAILED") : "SUBMITTED";
+  const status = receipt ? (receipt.status === 1 ? "CONFIRMED" : "FAILED") : "PENDING";
   const blockNumber = receipt ? BigInt(receipt.blockNumber) : null;
 
   const order = await prisma.$transaction(async (tx) => {
