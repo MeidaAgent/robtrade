@@ -1,6 +1,7 @@
 {
   "version": 2,
   "buildCommand": "npm --prefix backend install && npm --prefix backend run vercel-build",
+  "outputDirectory": ".",
   "routes": [
     {
       "src": "/(health|config|ready|auth|vault|swap|settlement)(.*)",
