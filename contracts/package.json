@@ -1,0 +1,13 @@
+{
+  "name": "robinhood-privacy-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "compile": "node scripts/compile.mjs",
+    "deploy": "node scripts/deploy.mjs"
+  },
+  "dependencies": {
+    "ethers": "^6.13.2",
+    "solc": "0.8.24"
+  }
+}

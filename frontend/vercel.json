@@ -1,0 +1,13 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/app", "destination": "/app/index.html" },
+    { "source": "/app/trade", "destination": "/app/trade/index.html" },
+    { "source": "/sdk", "destination": "/sdk/index.html" },
+    { "source": "/docs", "destination": "/docs/index.html" },
+    { "source": "/whitepaper", "destination": "/whitepaper/index.html" },
+    { "source": "/privacy", "destination": "/privacy/index.html" },
+    { "source": "/cookies", "destination": "/cookies/index.html" }
+  ]
+}

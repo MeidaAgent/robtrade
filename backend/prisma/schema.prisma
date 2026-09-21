@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  address     String   @unique
+  nonce       String
+  createdAt   DateTime @default(now())
+  lastLoginAt DateTime?
+
+  shieldedBalanceEvents ShieldedBalanceEvent[]
+  vaultNotes            VaultNote[]
+  swapQuotes            SwapQuote[]
+  swapOrders            SwapOrder[]
+  settlements           Settlement[]
+
+  @@index([lastLoginAt])
+}
+
+
+model VaultNote {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  commitment     String   @unique
+  txHash         String
+  encryptedNote  String
+  createdAt      DateTime @default(now())
+  spentAt        DateTime?
+
+  @@index([userId, createdAt])
+  @@index([userId, txHash])
+}
+
+model ShieldedBalanceEvent {
+  id                 String    @id @default(cuid())
+  userId             String?
+  user               User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  chainId            Int
+  txHash             String
+  logIndex           Int
+  direction          ShieldDirection
+  actorAddress       String
+  commitmentOrNullifier String
+  blockNumber        BigInt
+  createdAt          DateTime  @default(now())
+
+  @@unique([chainId, txHash, logIndex])
+  @@index([userId, blockNumber])
+  @@index([actorAddress, blockNumber])
+  @@index([chainId, blockNumber])
+}
+
+enum ShieldDirection {
+  SHIELD
+  UNSHIELD
+}
+
+model SwapQuote {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chainId        Int
+  tokenIn        String
+  tokenOut       String
+  amountIn       String
+  amountOut      String
+  minAmountOut   String
+  to             String
+  data           String
+  value          String
+  estimatedGas   String
+  quoteProvider  String
+  expiresAt      DateTime
+  usedAt         DateTime?
+  createdAt      DateTime @default(now())
+
+  order          SwapOrder?
+
+  @@index([userId, createdAt])
+  @@index([expiresAt])
+}
+
+model SwapOrder {
+  id             String     @id @default(cuid())
+  userId         String
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quoteId        String?    @unique
+  quote          SwapQuote? @relation(fields: [quoteId], references: [id], onDelete: Restrict)
+  chainId        Int
+  tokenIn        String
+  tokenOut       String
+  amountIn       String
+  minAmountOut   String
+  expectedTo     String?
+  expectedData   String?
+  expectedValue  String?
+  quoteProvider  String
+  status         SwapStatus @default(PENDING)
+  txHash         String?    @unique
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  settlement     Settlement?
+
+  @@index([userId, createdAt])
+  @@index([status, updatedAt])
+}
+
+enum SwapStatus {
+  PENDING
+  SUBMITTED
+  CONFIRMED
+  FAILED
+}
+
+model Settlement {
+  id           String           @id @default(cuid())
+  userId       String
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  txHash       String           @unique
+  kind         SettlementKind
+  status       SettlementStatus @default(PENDING)
+  chainId      Int
+  blockNumber  BigInt?
+  swapOrderId  String?          @unique
+  swapOrder    SwapOrder?       @relation(fields: [swapOrderId], references: [id], onDelete: SetNull)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([status, updatedAt])
+  @@index([chainId, blockNumber])
+}
+
+enum SettlementKind {
+  SHIELD
+  UNSHIELD
+  SWAP
+  PAYMENT
+}
+
+enum SettlementStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
+
+model IndexerState {
+  name          String   @id
+  chainId       Int      @unique
+  nextBlock     BigInt
+  lastBlockHash String?
+  updatedAt     DateTime @updatedAt
+}

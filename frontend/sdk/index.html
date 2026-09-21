@@ -1,0 +1,13 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RobTrade SDK</title><link rel="stylesheet" href="/app/style.css"></head><body><main class="shell"><nav><a href="/">RobTrade</a><a href="/app">Vault</a><a href="/app/trade">Trade</a><a href="/docs">Docs</a></nav><section class="hero"><p class="eyebrow">SDK</p><h1>Integration surface.</h1><p class="muted">The repository currently contains a backend API rather than the original SDK source package. These routes document the implemented API boundaries without claiming unimplemented ZK features.</p></section><section class="card"><h2>Implemented</h2><pre>POST /auth/nonce
+POST /auth/verify
+POST /vault/shield/prepare
+POST /vault/unshield/prepare
+GET  /vault/history
+POST /swap/quote
+POST /swap/orders
+POST /swap/orders/:id/submit
+GET  /settlements
+GET  /settlements/:txHash</pre><h2>Requires protocol implementation</h2><pre>Audited shielded-pool contract
+ZK circuit + prover/verifier
+Viewing-key protocol
+Private swap executor / relayer</pre></section></main></body></html>
