@@ -27,7 +27,7 @@
     "jsonwebtoken": "^9.0.2",
     "pino": "^9.4.0",
     "pino-http": "^10.3.0",
-    "serverless-http": "^3.3.0",
+    "serverless-http": "^4.0.0",
     "siwe": "^2.3.2",
     "zod": "^3.23.8",
     "pino-pretty": "^11.2.2"
