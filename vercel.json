@@ -8,7 +8,10 @@
       "dest": "/backend/api/index.js"
     },
     {
-      "handle": "filesystem"
+      "src": "/\\.(css|js|woff2|woff|png|jpg|jpeg|gif|svg|ico|webp|json)$",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
     },
     {
       "src": "/app/(.*)",
