@@ -8,16 +8,32 @@
       "dest": "/backend/api/index.js"
     },
     {
+      "src": "/app/(.*\\.(css|js|woff2|woff|png|jpg|jpeg|gif|svg|ico|txt|xml|json))",
+      "handle": "filesystem"
+    },
+    {
       "src": "/app/(.*)",
       "dest": "/app/index.html"
+    },
+    {
+      "src": "/sdk/(.*\\.(css|js|woff2|woff|png|jpg|jpeg|gif|svg|ico|txt|xml|json))",
+      "handle": "filesystem"
     },
     {
       "src": "/sdk/(.*)",
       "dest": "/sdk/index.html"
     },
     {
+      "src": "/docs/(.*\\.(css|js|woff2|woff|png|jpg|jpeg|gif|svg|ico|txt|xml|json))",
+      "handle": "filesystem"
+    },
+    {
       "src": "/docs/(.*)",
       "dest": "/docs/index.html"
+    },
+    {
+      "src": "/whitepaper/(.*\\.(css|js|woff2|woff|png|jpg|jpeg|gif|svg|ico|txt|xml|json))",
+      "handle": "filesystem"
     },
     {
       "src": "/whitepaper/(.*)",
