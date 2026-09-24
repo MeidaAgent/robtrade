@@ -2,6 +2,16 @@ const detectedApi = ['localhost','127.0.0.1','::1'].includes(window.location.hos
 const API_BASE = (window.ROBTRADE_API_BASE || localStorage.getItem('robtrade_api_base') || detectedApi).replace(/\/$/, '');
 const NOTE_STORAGE_KEY = 'robtrade_note_cache_v1';
 
+export function getActiveProvider() {
+  const pref = localStorage.getItem('robtrade_wallet_pref');
+  if (pref === 'okx' && window.okxwallet) return window.okxwallet;
+  if (pref === 'bitget' && (window.bitkeep?.ethereum || window.ethereum?.isBitKeep)) return window.bitkeep?.ethereum || window.ethereum;
+  if (pref === 'rabby' && (window.rabby || window.ethereum?.isRabby)) return window.rabby || window.ethereum;
+  if (pref === 'coinbase' && (window.coinbaseWalletExtension || window.ethereum?.isCoinbaseWallet)) return window.coinbaseWalletExtension || window.ethereum;
+  if (pref === 'metamask' && window.ethereum?.isMetaMask) return window.ethereum;
+  return window.okxwallet || window.bitkeep?.ethereum || window.rabby || window.coinbaseWalletExtension || window.ethereum;
+}
+
 export async function api(path, options = {}) {
   const headers = { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.headers || {}) };
   const token = localStorage.getItem('robtrade_jwt');
@@ -24,14 +34,17 @@ export async function api(path, options = {}) {
 }
 
 export async function connectWallet() {
-  if (!window.ethereum) throw new Error('Wallet EVM (MetaMask/OKX/Rabby/etc.) tidak ditemukan.');
-  const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+  const provider = getActiveProvider();
+  if (!provider) throw new Error('Wallet EVM (MetaMask, OKX, Bitget, Rabby, Coinbase, etc.) tidak ditemukan.');
+  const accounts = await provider.request({ method: 'eth_requestAccounts' });
   if (!accounts[0]) throw new Error('Tidak ada account yang dipilih.');
   return accounts[0];
 }
 
 async function enforceNetwork(config) {
-  const chainHex = await window.ethereum.request({ method: 'eth_chainId' });
+  const provider = getActiveProvider();
+  if (!provider) throw new Error('Wallet EVM tidak ditemukan.');
+  const chainHex = await provider.request({ method: 'eth_chainId' });
   const chainId = Number.parseInt(chainHex, 16);
   if (chainId !== Number(config.chainId)) {
     throw new Error(`${config.chainName || 'Target network'} diperlukan (chain ${config.chainId}). Switch network di wallet lalu coba lagi.`);
@@ -40,6 +53,8 @@ async function enforceNetwork(config) {
 }
 
 export async function signIn() {
+  const provider = getActiveProvider();
+  if (!provider) throw new Error('Wallet EVM tidak ditemukan.');
   const address = await connectWallet();
   const config = await api('/config');
   const chainId = await enforceNetwork(config);
@@ -52,7 +67,7 @@ export async function signIn() {
   const issuedAt = new Date();
   const expiration = new Date(Date.now() + 5 * 60 * 1000);
   const message = `${domain} wants you to sign in with your Ethereum account:\n${address}\n\nSign in to RobTrade. This request will not trigger a blockchain transaction.\n\nURI: ${uri}\nVersion: 1\nChain ID: ${chainId}\nNonce: ${nonce}\nIssued At: ${issuedAt.toISOString()}\nExpiration Time: ${expiration.toISOString()}`;
-  const signature = await window.ethereum.request({ method: 'personal_sign', params: [message, address] });
+  const signature = await provider.request({ method: 'personal_sign', params: [message, address] });
   const result = await api('/auth/verify', { method: 'POST', body: JSON.stringify({ message, signature }) });
   localStorage.setItem('robtrade_jwt', result.token);
   localStorage.setItem('robtrade_address', result.address);
@@ -60,14 +75,15 @@ export async function signIn() {
 }
 
 export async function sendPreparedTx(tx) {
-  if (!window.ethereum) throw new Error('Wallet EVM tidak ditemukan.');
-  const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+  const provider = getActiveProvider();
+  if (!provider) throw new Error('Wallet EVM tidak ditemukan.');
+  const accounts = await provider.request({ method: 'eth_accounts' });
   const loggedAddress = localStorage.getItem('robtrade_address');
   if (!accounts[0] || !loggedAddress || accounts[0].toLowerCase() !== loggedAddress.toLowerCase()) {
     throw new Error('Wallet aktif tidak sama dengan wallet yang login.');
   }
   const config = await api('/config');
-  const chainHex = await window.ethereum.request({ method: 'eth_chainId' });
+  const chainHex = await provider.request({ method: 'eth_chainId' });
   if (Number.parseInt(chainHex, 16) !== Number(config.chainId)) throw new Error(`Wrong network. Switch to chain ${config.chainId} before signing.`);
   const raw = {
     from: loggedAddress,
@@ -75,7 +91,7 @@ export async function sendPreparedTx(tx) {
     data: tx.data,
     value: `0x${BigInt(tx.value || 0).toString(16)}`,
   };
-  return window.ethereum.request({ method: 'eth_sendTransaction', params: [raw] });
+  return provider.request({ method: 'eth_sendTransaction', params: [raw] });
 }
 
 function bytesToHex(bytes) {

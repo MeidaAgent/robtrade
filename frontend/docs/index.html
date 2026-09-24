@@ -1,1 +1,87 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RobTrade Docs</title><link rel="stylesheet" href="/app/style.css"></head><body><main class="shell"><nav><a href="/">RobTrade</a><a href="/app">Vault</a><a href="/app/trade">Trade</a><a href="/sdk">SDK</a></nav><section class="hero"><p class="eyebrow">DOCS</p><h1>Backend API and security model.</h1><p class="muted">Authentication uses SIWE. Transactions are non-custodial. Quotes are stored server-side and verified again against the chain before a swap is marked submitted.</p></section><section class="card"><h2>Architecture note</h2><pre>Wallet → SIWE → API → quote/order → wallet transaction → RPC verification → settlement</pre><p class="muted">A public 0x transaction is not equivalent to a private swap. Privacy claims should only be restored after the audited shielded execution layer is actually integrated.</p></section></main></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>RobTrade · Documentation</title>
+  <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+  <link rel="stylesheet" href="/app/style.css">
+</head>
+<body>
+  <div class="atmos-glow" aria-hidden="true"></div>
+
+  <main class="shell">
+    <nav class="nav-bar">
+      <a class="brand" href="/">
+        <img src="/images/logo_utama.png" alt="RobTrade Logo">
+        <span>RobTrade</span>
+      </a>
+
+      <div class="nav-links">
+        <a href="/app/trade">Trade</a>
+        <a href="/app">Vault</a>
+        <a href="/sdk">SDK</a>
+        <a href="/docs" class="active">Docs</a>
+        <a href="/whitepaper">Whitepaper</a>
+      </div>
+
+      <div class="nav-actions">
+        <a href="/app" class="btn sm">Open Vault &#8594;</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <p class="eyebrow"><span class="pulse-dot"></span> ARCHITECTURE &amp; SPECIFICATION</p>
+      <h1>Backend API and security model.</h1>
+      <p class="muted">Authentication uses SIWE (EIP-4361). Transactions are non-custodial. Quotes are locked server-side and verified against chain state before marked settled.</p>
+
+      <div class="status-bar">
+        <div class="status-item">
+          <span>Security Model:</span>
+          <span class="pill pill-green"><span class="pulse-dot"></span> Non-Custodial</span>
+        </div>
+        <div class="status-divider"></div>
+        <div class="status-item">
+          <span>Auth Layer:</span>
+          <span class="pill pill-purple">SIWE Challenge-Response</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-bottom: 24px;">
+      <div class="sectionHead">
+        <div>
+          <p class="eyebrow">FLOW PIPELINE</p>
+          <h2>End-to-End Architecture</h2>
+        </div>
+        <span class="badge badge-purple">Onchain Settlement</span>
+      </div>
+
+      <div class="output-box">
+        <div class="output-header">
+          <span class="output-title">Transaction Lifecycle</span>
+        </div>
+        <pre style="margin: 0; background: transparent; border: 0; padding: 0;">Wallet → SIWE Signature → Authenticated API Session → RFQ Quote / Order Lock → Wallet Execution → Node RPC Verification → Finalized Settlement</pre>
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="muted">A public 0x transaction is not equivalent to a private swap. Privacy claims should only be restored after the audited shielded execution layer is actually integrated.</p>
+    </section>
+
+    <footer class="app-footer">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <img src="/images/logo_utama.png" alt="RobTrade" style="height: 18px; width: auto;">
+        <span>RobTrade · Docs</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <a href="/app">Vault</a>
+        <a href="/sdk">SDK</a>
+        <a href="/whitepaper">Whitepaper</a>
+        <a href="https://x.com/Robtradexyz" target="_blank" rel="noreferrer">@Robtradexyz</a>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>

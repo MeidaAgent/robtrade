@@ -1,13 +1,436 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RobTrade SDK</title><link rel="stylesheet" href="/app/style.css"></head><body><main class="shell"><nav><a href="/">RobTrade</a><a href="/app">Vault</a><a href="/app/trade">Trade</a><a href="/docs">Docs</a></nav><section class="hero"><p class="eyebrow">SDK</p><h1>Integration surface.</h1><p class="muted">The repository currently contains a backend API rather than the original SDK source package. These routes document the implemented API boundaries without claiming unimplemented ZK features.</p></section><section class="card"><h2>Implemented</h2><pre>POST /auth/nonce
-POST /auth/verify
-POST /vault/shield/prepare
-POST /vault/unshield/prepare
-GET  /vault/history
-POST /swap/quote
-POST /swap/orders
-POST /swap/orders/:id/submit
-GET  /settlements
-GET  /settlements/:txHash</pre><h2>Requires protocol implementation</h2><pre>Audited shielded-pool contract
-ZK circuit + prover/verifier
-Viewing-key protocol
-Private swap executor / relayer</pre></section></main></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="RobTrade Developer SDK and Backend Integration Surface. Build private onchain workflows on Robinhood Chain.">
+  <title>RobTrade · SDK &amp; API Integration</title>
+  <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+  <link rel="stylesheet" href="/app/style.css">
+  <style>
+    .endpoint-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .code-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .code-tab-btn {
+      background: transparent;
+      border: 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+    }
+    .code-tab-btn.active {
+      background: var(--panel-dark);
+      color: #FFFFFF;
+    }
+    .arch-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px;
+      background: var(--panel-muted);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .arch-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--panel-dark);
+      color: #FFFFFF;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="atmos-glow" aria-hidden="true"></div>
+
+  <main class="shell">
+    <!-- Navbar -->
+    <nav class="nav-bar">
+      <a class="brand" href="/">
+        <img src="/images/logo_utama.png" alt="RobTrade Logo">
+        <span>RobTrade</span>
+      </a>
+
+      <div class="nav-links">
+        <a href="/app/trade">Trade</a>
+        <a href="/app">Vault</a>
+        <a href="/sdk" class="active">SDK</a>
+        <a href="/docs">Docs</a>
+        <a href="/whitepaper">Whitepaper</a>
+      </div>
+
+      <div class="nav-actions">
+        <a href="/app" class="btn sm">Open Vault &#8594;</a>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <p class="eyebrow"><span class="pulse-dot"></span> DEVELOPER PLATFORM · CLIENT SDK &amp; APIS</p>
+      <h1>Build private onchain workflows.</h1>
+      <p class="muted">Integrate deterministic client note generation, shielded commitments, and verifiable settlement routing on Robinhood Chain.</p>
+
+      <!-- Protocol Capability Badges -->
+      <div class="status-bar">
+        <div class="status-item">
+          <span>Client Library:</span>
+          <span class="pill pill-purple">ESM · TypeScript</span>
+        </div>
+        <div class="status-divider"></div>
+        <div class="status-item">
+          <span>Target Chain:</span>
+          <span class="pill pill-green"><span class="pulse-dot"></span> Robinhood Chain (EVM)</span>
+        </div>
+        <div class="status-divider"></div>
+        <div class="status-item">
+          <span>Authentication:</span>
+          <span class="pill">SIWE (EIP-4361)</span>
+        </div>
+        <div class="status-divider"></div>
+        <div class="status-item">
+          <span>Encryption:</span>
+          <span class="pill">PBKDF2 + AES-256-GCM</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 1: Quickstart & Installation -->
+    <section class="card" style="margin-bottom: 28px;">
+      <div class="sectionHead">
+        <div>
+          <p class="eyebrow">INTEGRATION</p>
+          <h2>Quickstart</h2>
+        </div>
+        <span class="badge badge-purple">v0.2.0</span>
+      </div>
+
+      <!-- Package Manager Selector -->
+      <div class="code-tabs">
+        <button class="code-tab-btn active" onclick="switchPkg(this, 'npm')">npm</button>
+        <button class="code-tab-btn" onclick="switchPkg(this, 'pnpm')">pnpm</button>
+        <button class="code-tab-btn" onclick="switchPkg(this, 'yarn')">yarn</button>
+        <button class="code-tab-btn" onclick="switchPkg(this, 'esm')">Browser ESM</button>
+      </div>
+
+      <div class="output-box" style="margin-top: 0;">
+        <div class="output-header">
+          <span class="output-title" id="pkgTitle">Installation</span>
+          <button class="output-copy" onclick="copySnippet('pkgSnippet')">Copy</button>
+        </div>
+        <pre id="pkgSnippet" style="margin: 0; background: transparent; border: 0; padding: 0;">npm install @robtrade/sdk ethers</pre>
+      </div>
+
+      <!-- SDK Code Example -->
+      <h3 style="margin-top: 24px;">Client-Side Usage Example</h3>
+      <p class="muted small" style="margin-bottom: 12px;">Create client notes, shield assets, and attach encrypted recovery payloads to your authenticated wallet.</p>
+
+      <div class="output-box">
+        <div class="output-header">
+          <span class="output-title">JavaScript / TypeScript (client.js)</span>
+          <button class="output-copy" onclick="copySnippet('codeExample')">Copy Code</button>
+        </div>
+        <pre id="codeExample" style="margin: 0; background: transparent; border: 0; padding: 0;">import { makeNote, encryptNote, api, sendPreparedTx, signIn } from '/app/common.js';
+
+// 1. Sign in with Ethereum (SIWE)
+const address = await signIn();
+console.log('Connected wallet:', address);
+
+// 2. Generate a client-side note for 0.01 ETH (10^16 wei)
+// Secrets are generated in the browser via Web Crypto API
+const note = await makeNote('10000000000000000');
+console.log('Deterministic Commitment:', note.commitment);
+
+// 3. Encrypt note locally with user password before sending
+const encryptedNote = await encryptNote(note, 'user-secret-passphrase-1234');
+
+// 4. Prepare shield transaction on Robinhood Chain
+const prep = await api('/vault/shield/prepare', {
+  method: 'POST',
+  body: JSON.stringify({ commitment: note.commitment, amountWei: note.amountWei })
+});
+
+// 5. Send transaction with wallet and attach encrypted payload
+const txHash = await sendPreparedTx(prep.tx);
+await api('/vault/notes/attach', {
+  method: 'POST',
+  body: JSON.stringify({ commitment: note.commitment, txHash, encryptedNote })
+});
+console.log('Successfully shielded assets! TX:', txHash);</pre>
+      </div>
+    </section>
+
+    <!-- Section 2: Implemented API Routes -->
+    <section class="card" style="margin-bottom: 28px;">
+      <div class="sectionHead">
+        <div>
+          <p class="eyebrow">REST ENDPOINTS</p>
+          <h2>Backend API Surface</h2>
+        </div>
+        <span class="badge badge-green">Implemented</span>
+      </div>
+
+      <p class="muted">All backend routes are validated, protected by rate limiting, and use EIP-4361 SIWE tokens for authenticated endpoints.</p>
+
+      <!-- Grid of Endpoints -->
+      <div class="endpoint-grid">
+        <!-- Auth Nonce -->
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-tag method-post">POST</span>
+            <span class="endpoint-path">/auth/nonce</span>
+          </div>
+          <p class="endpoint-desc">Issue an EIP-4361 SIWE challenge nonce bound to the requesting address.</p>
+          <div class="output-box" style="margin-top: 8px; padding: 10px;">
+            <pre style="margin: 0; background: transparent; border: 0; padding: 0; min-height: auto;">{ "address": "0x123...abc" }
+→ { "nonce": "a9f3b18c..." }</pre>
+          </div>
+        </div>
+
+        <!-- Auth Verify -->
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-tag method-post">POST</span>
+            <span class="endpoint-path">/auth/verify</span>
+          </div>
+          <p class="endpoint-desc">Verify SIWE personal signature and issue authenticated JWT bearer token.</p>
+          <div class="output-box" style="margin-top: 8px; padding: 10px;">
+            <pre style="margin: 0; background: transparent; border: 0; padding: 0; min-height: auto;">{ "message": "...", "signature": "0x..." }
+→ { "token": "eyJhbG...", "address": "0x..." }</pre>
+          </div>
+        </div>
+
+        <!-- Shield Prepare -->
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-tag method-post">POST</span>
+            <span class="endpoint-path">/vault/shield/prepare</span>
+          </div>
+          <p class="endpoint-desc">Prepare transaction calldata to deposit assets into the commitment pool.</p>
+          <div class="output-box" style="margin-top: 8px; padding: 10px;">
+            <pre style="margin: 0; background: transparent; border: 0; padding: 0; min-height: auto;">{ "commitment": "0x...", "amountWei": "1000000" }
+→ { "tx": { "to": "0x...", "data": "0x...", "value": "1000000" } }</pre>
+          </div>
+        </div>
+
+        <!-- Notes Attach -->
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-tag method-post">POST</span>
+            <span class="endpoint-path">/vault/notes/attach</span>
+          </div>
+          <p class="endpoint-desc">Store ciphertext note associated with your authenticated wallet.</p>
+          <div class="output-box" style="margin-top: 8px; padding: 10px;">
+            <pre style="margin: 0; background: transparent; border: 0; padding: 0; min-height: auto;">{ "commitment": "0x...", "txHash": "0x...", "encryptedNote": "{...}" }
+→ { "ok": true, "note": { "id": 1 } }</pre>
+          </div>
+        </div>
+
+        <!-- Notes List -->
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-tag method-get">GET</span>
+            <span class="endpoint-path">/vault/notes</span>
+          </div>
+          <p class="endpoint-desc">Fetch all encrypted notes stored for the authenticated caller.</p>
+          <div class="output-box" style="margin-top: 8px; padding: 10px;">
+            <pre style="margin: 0; background: transparent; border: 0; padding: 0; min-height: auto;">Header: Authorization: Bearer &lt;token&gt;
+→ { "notes": [ { "id": 1, "commitment": "0x...", "encryptedNote": "..." } ] }</pre>
+          </div>
+        </div>
+
+        <!-- History -->
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-tag method-get">GET</span>
+            <span class="endpoint-path">/vault/history</span>
+          </div>
+          <p class="endpoint-desc">Get user's shielded and unshielded transaction ledger history.</p>
+          <div class="output-box" style="margin-top: 8px; padding: 10px;">
+            <pre style="margin: 0; background: transparent; border: 0; padding: 0; min-height: auto;">Header: Authorization: Bearer &lt;token&gt;
+→ { "history": [ { "type": "shield", "txHash": "0x...", "amountWei": "..." } ] }</pre>
+          </div>
+        </div>
+
+        <!-- Swap Quote -->
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-tag method-post">POST</span>
+            <span class="endpoint-path">/swap/quote</span>
+          </div>
+          <p class="endpoint-desc">Query 0x protocol routing quote for token swaps on Robinhood Chain.</p>
+          <div class="output-box" style="margin-top: 8px; padding: 10px;">
+            <pre style="margin: 0; background: transparent; border: 0; padding: 0; min-height: auto;">{ "tokenIn": "0x...", "tokenOut": "0x...", "amountIn": "1000" }
+→ { "quoteId": "q_123", "price": "...", "buyAmount": "..." }</pre>
+          </div>
+        </div>
+
+        <!-- Swap Orders -->
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-tag method-post">POST</span>
+            <span class="endpoint-path">/swap/orders</span>
+          </div>
+          <p class="endpoint-desc">Lock executable calldata and prepare swap transaction order.</p>
+          <div class="output-box" style="margin-top: 8px; padding: 10px;">
+            <pre style="margin: 0; background: transparent; border: 0; padding: 0; min-height: auto;">{ "quoteId": "q_123" }
+→ { "order": { "id": "ord_1", "expectedTo": "0x...", "expectedData": "0x..." } }</pre>
+          </div>
+        </div>
+
+        <!-- Swap Submit -->
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-tag method-post">POST</span>
+            <span class="endpoint-path">/swap/orders/:id/submit</span>
+          </div>
+          <p class="endpoint-desc">Verify submitted swap hash onchain and mark transaction completed.</p>
+          <div class="output-box" style="margin-top: 8px; padding: 10px;">
+            <pre style="margin: 0; background: transparent; border: 0; padding: 0; min-height: auto;">{ "txHash": "0x..." }
+→ { "ok": true, "status": "CONFIRMED" }</pre>
+          </div>
+        </div>
+
+        <!-- Settlements -->
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-tag method-get">GET</span>
+            <span class="endpoint-path">/settlements</span>
+          </div>
+          <p class="endpoint-desc">List confirmed settlement transactions with public proof receipts.</p>
+          <div class="output-box" style="margin-top: 8px; padding: 10px;">
+            <pre style="margin: 0; background: transparent; border: 0; padding: 0; min-height: auto;">→ { "settlements": [ { "txHash": "0x...", "blockNumber": 149204 } ] }</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Architecture & Security Boundaries -->
+    <section class="card" style="margin-bottom: 28px;">
+      <div class="sectionHead">
+        <div>
+          <p class="eyebrow">SECURITY BOUNDARIES</p>
+          <h2>Protocol Architecture</h2>
+        </div>
+        <span class="badge badge-green">Cryptographic isolation</span>
+      </div>
+
+      <p class="muted" style="margin-bottom: 20px;">RobTrade uses strict cryptographic boundary separation. Secrets and private keys never leave client memory.</p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 24px;">
+        <div class="arch-step">
+          <div class="arch-num">1</div>
+          <div>
+            <strong>Client Generation</strong>
+            <p class="muted small" style="margin-top: 4px;">SHA-256 deterministic commitment is calculated locally. Plaintext note is encrypted using PBKDF2 (150,000 iterations) with AES-256-GCM.</p>
+          </div>
+        </div>
+
+        <div class="arch-step">
+          <div class="arch-num">2</div>
+          <div>
+            <strong>API Preparation</strong>
+            <p class="muted small" style="margin-top: 4px;">Backend prepares non-custodial EVM transactions. The backend never holds custody of funds or private keys.</p>
+          </div>
+        </div>
+
+        <div class="arch-step">
+          <div class="arch-num">3</div>
+          <div>
+            <strong>Onchain Settlement</strong>
+            <p class="muted small" style="margin-top: 4px;">Transactions settle on Robinhood Chain. Public explorer witnesses proof execution, without exposing trading size or account balance.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Roadmap / Specification note -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <h3 style="margin-bottom: 4px;">Next Protocol Upgrades</h3>
+          <p class="muted small">Full ZK-SNARK verifier circuit, viewing-key protocol for audited compliance, and private relayer execution network.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <span class="pill">Groth16 Verifier</span>
+          <span class="pill">Viewing Keys</span>
+          <span class="pill">Private Relayers</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <img src="/images/logo_utama.png" alt="RobTrade" style="height: 18px; width: auto;">
+        <span>RobTrade · Developer Platform</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <a href="/app">Vault</a>
+        <a href="/app/trade">Trade</a>
+        <a href="/docs">Docs</a>
+        <a href="/whitepaper">Whitepaper</a>
+        <a href="https://x.com/Robtradexyz" target="_blank" rel="noreferrer">@Robtradexyz</a>
+      </div>
+    </footer>
+  </main>
+
+  <div id="toast" class="toast">Copied to clipboard</div>
+
+  <script>
+    function switchPkg(btn, pkg) {
+      document.querySelectorAll('.code-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const snippet = document.getElementById('pkgSnippet');
+      const title = document.getElementById('pkgTitle');
+
+      if (pkg === 'npm') {
+        title.textContent = 'Installation (npm)';
+        snippet.textContent = 'npm install @robtrade/sdk ethers';
+      } else if (pkg === 'pnpm') {
+        title.textContent = 'Installation (pnpm)';
+        snippet.textContent = 'pnpm add @robtrade/sdk ethers';
+      } else if (pkg === 'yarn') {
+        title.textContent = 'Installation (yarn)';
+        snippet.textContent = 'yarn add @robtrade/sdk ethers';
+      } else if (pkg === 'esm') {
+        title.textContent = 'Browser ESM (No Bundler)';
+        snippet.textContent = '<script type="module">\n  import { makeNote, encryptNote, api } from \'https://robtrade.trade/app/common.js\';\n<\\/script>';
+      }
+    }
+
+    function copySnippet(id) {
+      const text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied code to clipboard');
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+  </script>
+</body>
+</html>

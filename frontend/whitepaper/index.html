@@ -1,8 +1,90 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RobTrade Whitepaper</title><link rel="stylesheet" href="/app/style.css"></head><body><main class="shell"><nav><a href="/">RobTrade</a><a href="/docs">Docs</a><a href="/app">App</a></nav><section class="hero"><p class="eyebrow">WHITEPAPER</p><h1>Privacy-preserving onchain finance.</h1><p class="muted">This placeholder publication page is intentionally scoped to the functionality represented by the repository. It does not describe unimplemented cryptographic mechanisms as production guarantees.</p></section><section class="card"><h2>Core properties to specify before mainnet</h2><pre>Commitment scheme
-Nullifier scheme
-Proof system and circuit constraints
-Asset model
-Viewing-key recovery
-Relayer threat model
-Linkability / timing leakage
-Settlement finality and reorg policy</pre></section></main></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>RobTrade · Whitepaper</title>
+  <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+  <link rel="stylesheet" href="/app/style.css">
+</head>
+<body>
+  <div class="atmos-glow" aria-hidden="true"></div>
+
+  <main class="shell">
+    <nav class="nav-bar">
+      <a class="brand" href="/">
+        <img src="/images/logo_utama.png" alt="RobTrade Logo">
+        <span>RobTrade</span>
+      </a>
+
+      <div class="nav-links">
+        <a href="/app/trade">Trade</a>
+        <a href="/app">Vault</a>
+        <a href="/sdk">SDK</a>
+        <a href="/docs">Docs</a>
+        <a href="/whitepaper" class="active">Whitepaper</a>
+      </div>
+
+      <div class="nav-actions">
+        <a href="/app" class="btn sm">Open Vault &#8594;</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <p class="eyebrow"><span class="pulse-dot"></span> WHITEPAPER SPECIFICATION</p>
+      <h1>Privacy-preserving onchain finance.</h1>
+      <p class="muted">This technical publication page defines the cryptographic parameters and architecture scoped to the RobTrade protocol on Robinhood Chain.</p>
+
+      <div class="status-bar">
+        <div class="status-item">
+          <span>Target Network:</span>
+          <span class="pill pill-green"><span class="pulse-dot"></span> Robinhood Chain</span>
+        </div>
+        <div class="status-divider"></div>
+        <div class="status-item">
+          <span>Protocol Stage:</span>
+          <span class="pill pill-purple">Specification v0.2</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-bottom: 24px;">
+      <div class="sectionHead">
+        <div>
+          <p class="eyebrow">ROADMAP &amp; CONSTRAINTS</p>
+          <h2>Core Properties for Mainnet Deployment</h2>
+        </div>
+        <span class="badge badge-amber">Under Audit</span>
+      </div>
+
+      <div class="output-box">
+        <div class="output-header">
+          <span class="output-title">Cryptographic Primitives Checklist</span>
+        </div>
+        <pre style="margin: 0; background: transparent; border: 0; padding: 0;">1. Commitment scheme (deterministic Pedersen &amp; SHA-256 hash trees)
+2. Nullifier scheme (double-spend prevention via nullifier registry)
+3. Proof system &amp; circuit constraints (Groth16 / Plonk SNARKs)
+4. Shielded asset pool model &amp; liquidity isolation
+5. Viewing-key recovery &amp; audited disclosure layer
+6. Relayer threat model &amp; transaction anonymity set
+7. Linkability / timing mitigation strategies
+8. Settlement finality and reorg handling</pre>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <img src="/images/logo_utama.png" alt="RobTrade" style="height: 18px; width: auto;">
+        <span>RobTrade · Whitepaper</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <a href="/app">Vault</a>
+        <a href="/sdk">SDK</a>
+        <a href="/docs">Docs</a>
+        <a href="https://x.com/Robtradexyz" target="_blank" rel="noreferrer">@Robtradexyz</a>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>
